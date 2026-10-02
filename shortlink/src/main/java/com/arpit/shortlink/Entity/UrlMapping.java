@@ -24,6 +24,7 @@ public class UrlMapping {
 
     private LocalDateTime createdAt ; 
     private LocalDateTime expireAt ;
+    private LocalDateTime lastAccessAt ; 
 
     private Long clickCount = 0L ; 
 
@@ -64,4 +65,11 @@ public class UrlMapping {
         return clickCount;
     }
 
+    public void setLastAccessAt(LocalDateTime lastAccessAt) {
+        this.lastAccessAt = lastAccessAt;
+    }
+    public LocalDateTime getLastAccessAt() {
+        return lastAccessAt;
+    }
+    
 }

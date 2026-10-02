@@ -15,7 +15,7 @@ import com.arpit.shortlink.util.UrlValidator;
 import com.arpit.shortlink.GlobalExceptionHandling.urlNotFoundException;
 import org.springframework.data.redis.core.RedisTemplate;
 import java.time.Duration;
-
+import com.arpit.shortlink.util.IncreaseClickCount;
 
 @Service 
 public class UrlServiceImpl implements UrlService {
@@ -27,6 +27,9 @@ public class UrlServiceImpl implements UrlService {
 
     @Autowired 
     RedisTemplate<String, String> redisTemplate ; 
+
+    @Autowired 
+    private IncreaseClickCount increaseClickCount ;
 
     @Override
     public UrlMapping createShortUrl(URLRequest longUrl){
@@ -66,10 +69,16 @@ public class UrlServiceImpl implements UrlService {
 
     }
 
+
+
+
+
     @Override 
     public String getUrl(String shortCode){
         if(redisTemplate.hasKey(shortCode)){
-            return redisTemplate.opsForValue().get(shortCode) ; 
+            System.out.println("url found in redis cache") ;
+        increaseClickCount.increaseClickCount(shortCode) ;
+        return redisTemplate.opsForValue().get(shortCode) ; 
         }
        Optional<UrlMapping> userStruct = urlRepository.findByShortCode(shortCode) ; 
        if(userStruct.isPresent()){
@@ -84,6 +93,9 @@ public class UrlServiceImpl implements UrlService {
             Duration remainingTime = Duration.between(LocalDateTime.now(), exp);
             if(exp != null &&  !remainingTime.isNegative() && !remainingTime.isZero() )   redisTemplate.opsForValue().set(shortCode , userStruct.get().getLongUrl() , remainingTime) ;    
             }
+            userStruct.get().setClickCount(userStruct.get().getClickCount() + 1) ;
+             userStruct.get().setLastAccessAt(java.time.LocalDateTime.now()) ; 
+                  urlRepository.save(userStruct.get()) ;
         return userStruct.get().getLongUrl() ; 
        }
 
