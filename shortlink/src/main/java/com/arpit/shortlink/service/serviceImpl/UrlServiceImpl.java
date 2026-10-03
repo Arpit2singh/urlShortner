@@ -16,6 +16,7 @@ import com.arpit.shortlink.GlobalExceptionHandling.urlNotFoundException;
 import org.springframework.data.redis.core.RedisTemplate;
 import java.time.Duration;
 import com.arpit.shortlink.util.IncreaseClickCount;
+import com.arpit.shortlink.service.RateLimiterService;
 
 @Service 
 public class UrlServiceImpl implements UrlService {
@@ -33,7 +34,7 @@ public class UrlServiceImpl implements UrlService {
 
     @Override
     public UrlMapping createShortUrl(URLRequest longUrl){
-      
+        
         Boolean check = urlValidator.isValid(longUrl.getLongurl()) ; 
         if(!check){
             throw new InvalidUrlException("Invalid URL format. Please provide a valid URL.");

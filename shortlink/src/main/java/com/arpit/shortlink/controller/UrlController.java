@@ -15,10 +15,14 @@ import com.arpit.shortlink.DTO.request.URLRequest;
 import com.arpit.shortlink.Entity.UrlMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+
+import jakarta.servlet.http.HttpServletRequest;
 // import org.springframework.web.bind.annotation.RequestMapping;
 // import org.springframework.web.servlet.view.RedirectView;
 import jakarta.validation.Valid;
 import com.arpit.shortlink.Repository.UrlRepository ;
+import com.arpit.shortlink.Resolver.ClientIpResolver ;
+import com.arpit.shortlink.service.RateLimiterService ;
 
 
 @RestController 
@@ -30,13 +34,26 @@ public class UrlController {
     @Autowired 
     private UrlRepository urlRepository ;
 
+    @Autowired 
+    private ClientIpResolver clientIpResolver ;
+    
+    @Autowired 
+    private RateLimiterService rateLimiterService ;
+
+    @GetMapping("/getIp")
+    public String getUserIp(HttpServletRequest request){
+        return clientIpResolver.getUserIp(request) ; 
+    }
+
     @PostMapping("/api/shorten")
-    public UrlMapping shortenUrl(@Valid @RequestBody URLRequest longUrl){
+    public UrlMapping shortenUrl(@Valid @RequestBody URLRequest longUrl , HttpServletRequest request){
+       rateLimiterService.HandlingIpAddress(request) ;
        return urlService.createShortUrl(longUrl) ;
     }
 
     @GetMapping("/get/longUrl/{shortCode}")
-    public String getLongUrl(@PathVariable String shortCode){
+    public String getLongUrl(@PathVariable String shortCode , HttpServletRequest request){
+         rateLimiterService.HandlingIpAddress(request) ;
         String longUrl = urlService.getUrl(shortCode) ;
         return longUrl ; 
     }

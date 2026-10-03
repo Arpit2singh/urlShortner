@@ -2,12 +2,15 @@ package com.arpit.shortlink.DTO.request;
 
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.servlet.http.HttpServletRequest;
+
 public class URLRequest {
 
     @NotBlank 
     private String longurl ; 
 
     private Integer expireAt ;
+
 
     public void setLongurl(String longurl){
         this.longurl = longurl ; 
